@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react';
-import { BookOpen, Check, Copy, MessageCircle } from 'lucide-react';
+import { BookOpen, Check, Copy } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { openDiscordInvite } from '../shared/discordCommunity';
 import { Sheet, SheetButton } from '../shared/Sheet';
 import { Group, Row, Value, type SettingsGroupDef } from './settings/kit';
 import { copyText } from '../../utils/system/clipboard';
@@ -14,7 +13,9 @@ import { iconLabel } from './settings/pages/iconLabel';
 
 const FOLIA_GUIDE_URL = 'https://folia-site.cielaniska.top/guide/llm-routing';
 const FOLIA_DOCS_URL = 'https://folia-site.cielaniska.top/guide/';
-const FOLIA_REPOSITORY_URL = 'https://github.com/chthollyphile/folia-major';
+// fork 的仓库，不是上游 chthollyphile/folia-major —— 同步上游时被带回原版过，
+// 别再让它落回去。
+const FOLIA_REPOSITORY_URL = 'https://github.com/maimai993/folia-major';
 
 const LINKS: SettingsGroupDef = { id: 'aiHelpLinks', titleKey: 'aiHelp.title' };
 const ASK_AI: SettingsGroupDef = { id: 'aiHelpPrompt', titleKey: 'aiHelp.askAiTitle' };
@@ -89,9 +90,11 @@ export const AiHelpPromptModal: React.FC<AiHelpPromptModalProps> = ({
                     <Row label={iconLabel(BookOpen, t('aiHelp.docsTitle'))} onClick={() => openOutsideLink(FOLIA_DOCS_URL)}>
                         <Value>{t('aiHelp.openDocs')}</Value>
                     </Row>
-                    <Row label={iconLabel(MessageCircle, t('aiHelp.discordTitle'))} onClick={openDiscordInvite}>
-                        <Value>{t('aiHelp.openDiscord')}</Value>
-                    </Row>
+                    {/*
+                     * 以前这里还有一条 Discord 社区（论坛）入口，已按 folia-sonnet 的样子撤掉。
+                     * 别再从 shared/discordCommunity 或 help.communityDiscord / aiHelp.discordTitle
+                     * 把它接回来 —— 上游合并最容易把这类「本来就没有」的入口带回来。
+                     */}
                 </Group>
                 <Group def={ASK_AI} foot={t('aiHelp.usageHint')}>
                     <pre className="select-text whitespace-pre-wrap break-words px-4 py-3.5 font-mono text-xs leading-[19px] text-[color:var(--st-t1)]">

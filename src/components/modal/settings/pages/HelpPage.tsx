@@ -1,10 +1,10 @@
 import React from 'react';
-import { ChevronRight, CircleHelp, ExternalLink, Lightbulb, MessageCircle, Sparkles, Users, type LucideIcon } from 'lucide-react';
+import { ChevronRight, CircleHelp, ExternalLink, Lightbulb, Sparkles, Users, type LucideIcon } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { openPonderNavigation } from '../../../../services/ponder/pagePonderTarget';
 import { BUILD_KIND_TAGS, getBuildKind } from '../../../../utils/buildProvenance';
 import { PRIMARY_MODIFIER_LABEL } from '../../../../utils/platform';
-import { openDiscordInvite } from '../../../shared/discordCommunity';
+import { JoinCommunityButton } from '../../../shared/JoinCommunityButton';
 import { QQ_COMMUNITY_GROUP_NUMBER } from '../../../shared/qqCommunity';
 import { HELP_TAB_PLAYER_CONTROLS, HELP_TAB_PRIMARY_SHORTCUTS } from '../../userGuideContent';
 import { Button, CopyButton, CopyValue, Group, Keys, Row, type SettingsGroupDef } from '../kit';
@@ -20,8 +20,9 @@ import { iconLabel } from './iconLabel';
 // is not in pages/index.ts and the search does not list it; the settings window mounts it itself
 // and hands it the two dialogs it opens.
 
-const REPOSITORY_URL = 'https://github.com/chthollyphile/folia-major';
-const REPOSITORY_NAME = 'chthollyphile/folia-major';
+// fork 的仓库，不是上游 chthollyphile/folia-major —— 同步上游时被带回原版过，别再让它落回去。
+const REPOSITORY_URL = 'https://github.com/maimai993/folia-major';
+const REPOSITORY_NAME = 'maimai993/folia-major';
 const BUILD_KIND = getBuildKind();
 const VERSION_INFO = (__DOCKER_STACK_VERSION__
     ? `${__APP_VERSION_LABEL__} v${__APP_VERSION__} · Stack ${__DOCKER_STACK_VERSION__} · ${__COMMIT_HASH__}`
@@ -144,12 +145,17 @@ const HelpPage: React.FC<HelpPageProps> = ({ onOpenReleaseNotes, onOpenAiHelp, o
 
             <Group def={SUPPORT} bare>
                 <Row label={iconLabel(CircleHelp, t('aiHelp.openButton'))} onClick={onOpenAiHelp} />
-                <Row label={iconLabel(MessageCircle, t('help.joinDiscord'))} onClick={openDiscordInvite} />
                 {/* A QQ group has no link that opens it: the row gives its number to copy. */}
                 <Row label={iconLabel(Users, t('help.communityQq'))}>
                     <CopyValue value={QQ_COMMUNITY_GROUP_NUMBER} />
                 </Row>
             </Group>
+
+            {/* 加入群聊的弹窗入口：沿用「加入社区」那颗胶囊，点开向上弹出菜单，
+                菜单里是 QQ 自助交流群，点它复制群号（QQ 群没有能直接打开的入群链接）。 */}
+            <div className="mt-2 flex justify-center">
+                <JoinCommunityButton />
+            </div>
 
             <Group def={ABOUT} bare>
                 <Row label={t('help.version')}>
@@ -169,7 +175,16 @@ const HelpPage: React.FC<HelpPageProps> = ({ onOpenReleaseNotes, onOpenAiHelp, o
                         <button type="button" onClick={onProjectLabelClick} className="cursor-default">{t('help.madeBy')}</button>
                     )}
                 >
-                    <Button variant="quiet" onClick={() => openOutsideLink(REPOSITORY_URL)}>
+                    {/*
+                     * 这颗就是「跳仓库」的那颗按钮 —— 以前用的是 quiet 那一档（24px 高、次级
+                     * 文字色、没有底），手机上再乘一遍界面缩放就只剩指甲盖那么一点，而它的行
+                     * 标题写的是「项目：」—— 一行没有任何链接暗示的字里藏着一粒灰字，看上去
+                     * 就跟「仓库链接被删了」一模一样。
+                     *
+                     * 所以改成常规那一档（Button 缺省即 fill）：有底色和自身高度，看得出来能
+                     * 按；外链图标保留。行标题（含那个数到第七下出猫的点击）一个字都不动。
+                     */}
+                    <Button onClick={() => openOutsideLink(REPOSITORY_URL)}>
                         {REPOSITORY_NAME}
                         <ExternalLink size={12} />
                     </Button>
