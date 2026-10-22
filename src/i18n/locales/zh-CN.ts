@@ -5249,5 +5249,16 @@ export default {
         "noMatch": "左下角的「不使用在线数据」让这首歌只用文件自己的信息。"
       }
     }
+  },
+  "freeSoftwareNotice": {
+    "title": "Folia 是免费软件",
+    "freeForever": "Folia 完全免费，所有功能对所有人开放。",
+    "noPaidTier": "官方没有付费会员、激活码或「解锁版」，也永远不会向您收取任何费用。",
+    "paidIsScam": "如果您是从第三方渠道付费获得的，那不是官方行为，请尽快申请退款。",
+    "joinGroup": "加入官方 QQ 群",
+    "joinGroupHint": "官方 QQ 群 {{number}} · 点击复制群号",
+    "groupCopied": "群号已复制",
+    "officialChannels": "软件内与官方 QQ 群是我们唯一发布消息的地方。",
+    "acknowledge": "我知道了"
   }
 } as const;

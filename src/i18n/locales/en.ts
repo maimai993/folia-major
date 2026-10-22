@@ -5249,5 +5249,16 @@ export default {
         "noMatch": "“Don't use online metadata” at the bottom left makes the song use only what the file has."
       }
     }
+  },
+  "freeSoftwareNotice": {
+    "title": "Folia is free software",
+    "freeForever": "Folia is completely free, and every feature is open to everyone.",
+    "noPaidTier": "There is no paid membership, activation code or unlocked edition, and we will never charge you.",
+    "paidIsScam": "If you paid for it through a third party, that was not official — please ask for a refund.",
+    "joinGroup": "Join the official QQ group",
+    "joinGroupHint": "Official QQ group {{number}} · click to copy",
+    "groupCopied": "Group number copied",
+    "officialChannels": "The app itself and the official QQ group are the only places we post news.",
+    "acknowledge": "Got it"
   }
 } as const;

@@ -28,6 +28,7 @@ import { useVisualizerAroundWall, wallExitCompleted, WALL_LAYER } from './compon
 import { useMorphKeepsHost } from './components/collectionFlight';
 import { UserGuideModal } from './components/modal/UserGuideModal';
 import ReleaseNotesDialog from './components/modal/ReleaseNotesDialog';
+import FreeSoftwareNoticeModal from './components/modal/FreeSoftwareNoticeModal';
 import LegacyModelsPrompt from './components/modal/LegacyModelsPrompt';
 import { PlaybackEntryViewPrompt } from './components/modal/playback-entry-view/PlaybackEntryViewPrompt';
 import { LatticeFmNotice } from './components/modal/playback-entry-view/LatticeFmNotice';
@@ -2895,6 +2896,12 @@ export default function App() {
             {/* 登录窗口挂在最外层：每个资料库界面（网格、Bravais、文本）都用 openLoginWindow 打开同一个窗口。 */}
             <LoginHost account={accountController} />
             {signOutDialog}
+            {/* 首次启动的免费软件声明：排在所有启动弹窗最前面，每个安装只弹一次。 */}
+            <FreeSoftwareNoticeModal
+                isOpen={startupExperience.isFreeSoftwareNoticeOpen}
+                isDaylight={isDaylight}
+                onClose={startupExperience.closeFreeSoftwareNotice}
+            />
             <ReleaseNotesDialog
                 isOpen={startupExperience.isReleaseNotesOpen}
                 isDaylight={isDaylight}

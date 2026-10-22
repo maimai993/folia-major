@@ -5249,5 +5249,16 @@ export default {
         "noMatch": "“Jangan gunakan metadata online” di kiri bawah membuat lagu ini hanya memakai milik berkasnya."
       }
     }
+  },
+  "freeSoftwareNotice": {
+    "title": "Folia adalah perangkat lunak gratis",
+    "freeForever": "Folia sepenuhnya gratis, dan semua fitur terbuka untuk semua orang.",
+    "noPaidTier": "Tidak ada keanggotaan berbayar, kode aktivasi, atau versi tidak terkunci, dan kami tidak akan pernah memungut biaya.",
+    "paidIsScam": "Jika Anda membayarnya melalui pihak ketiga, itu tidak resmi — mohon minta pengembalian dana.",
+    "joinGroup": "Gabung grup QQ resmi",
+    "joinGroupHint": "Grup QQ resmi {{number}} · klik untuk menyalin",
+    "groupCopied": "Nomor grup disalin",
+    "officialChannels": "Aplikasi ini dan grup QQ resmi adalah satu-satunya tempat kami mengumumkan kabar.",
+    "acknowledge": "Saya mengerti"
   }
 } as const;
