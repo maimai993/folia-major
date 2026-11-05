@@ -100,6 +100,12 @@ contextBridge.exposeInMainWorld('electron', {
         ipcRenderer.on('wallpaper-input-monitor-requested', listener);
         return () => ipcRenderer.removeListener('wallpaper-input-monitor-requested', listener);
     },
+    onWallpaperAccessibilitySuggested: (callback) => {
+        const listener = () => callback();
+        ipcRenderer.on('wallpaper-accessibility-suggested', listener);
+        return () => ipcRenderer.removeListener('wallpaper-accessibility-suggested', listener);
+    },
+    getGpuPreferenceState: () => ipcRenderer.invoke('gpu-preference-state'),
     getWallpaperDisplays: () => ipcRenderer.invoke('wallpaper-displays-get'),
     setWallpaperDisplay: (displayId) => ipcRenderer.invoke('wallpaper-display-set', displayId),
     onWallpaperDisplaysChanged: (callback) => {
@@ -107,7 +113,14 @@ contextBridge.exposeInMainWorld('electron', {
         ipcRenderer.on('wallpaper-displays-changed', listener);
         return () => ipcRenderer.removeListener('wallpaper-displays-changed', listener);
     },
+    setWallpaperHitRegions: (rects) => ipcRenderer.send('wallpaper-hit-regions', rects),
     setPlaybackDisplaySleepBlockingActive: (active) => ipcRenderer.invoke('playback-display-sleep-set-active', active),
+    getBackgroundThrottlingState: () => ipcRenderer.invoke('background-throttling-get'),
+    onBackgroundThrottlingChanged: (callback) => {
+        const listener = (_event, state) => callback(state);
+        ipcRenderer.on('background-throttling-changed', listener);
+        return () => ipcRenderer.removeListener('background-throttling-changed', listener);
+    },
     setAppLocale: (localeKey) => ipcRenderer.invoke('set-app-locale', localeKey),
     getCacheDirectory: () => ipcRenderer.invoke('get-cache-directory'),
     chooseCacheDirectory: () => ipcRenderer.invoke('choose-cache-directory'),
@@ -145,6 +158,7 @@ contextBridge.exposeInMainWorld('electron', {
     generateTheme: (lyricsText, options) => ipcRenderer.invoke('generate-theme', lyricsText, options),
     segmentLyrics: (lines) => ipcRenderer.invoke('segment-lyrics', lines),
     testAiConnection: (settings) => ipcRenderer.invoke('ai-test-connection', settings),
+    listAiModels: (settings) => ipcRenderer.invoke('ai-list-models', settings),
     fetchLyricProxy: (url, init) => ipcRenderer.invoke('lyric-proxy-fetch', url, init),
     getNeteasePort: () => ipcRenderer.invoke('get-netease-port'),
     getNeteaseApiStatus: () => ipcRenderer.invoke('get-netease-api-status'),
@@ -159,8 +173,12 @@ contextBridge.exposeInMainWorld('electron', {
     },
     getKugouApiStatus: () => ipcRenderer.invoke('kugou-api-status'),
     kugouRequest: (operation, params) => ipcRenderer.invoke('kugou-api-request', operation, params),
+    qishuiRequest: (operation, params) => ipcRenderer.invoke('qishui-api-request', operation, params),
+    fnmusicRequest: (operation, params) => ipcRenderer.invoke('fnmusic-api-request', operation, params),
     bodianRequest: (operation, params) => ipcRenderer.invoke('bodian-api-request', operation, params),
     ytmRequest: (operation, params) => ipcRenderer.invoke('ytm-api-request', operation, params),
+    appleMusicWindowsExperimental: process.platform === 'win32' && process.env.ELECTRON_DEV === 'true' && process.env.FOLIA_APPLE_MUSIC_WINDOWS_EXPERIMENTAL === '1',
+    appleMusicRequest: (operation, params) => ipcRenderer.invoke('apple-music-request', operation, params),
     spotifyRequest: (operation, params) => ipcRenderer.invoke('spotify-api-request', operation, params),
     getQqPort: () => ipcRenderer.invoke('get-qq-port'),
     getQqApiStatus: () => ipcRenderer.invoke('get-qq-api-status'),
@@ -191,9 +209,10 @@ contextBridge.exposeInMainWorld('electron', {
         return () => ipcRenderer.removeListener('window-playback-handoff-requested', listener);
     },
     setNativeTheme: (themeSource) => ipcRenderer.invoke('window-set-native-theme', themeSource),
+    setKeyCaptureActive: (active) => ipcRenderer.send('key-capture-active', active === true),
     getMainWindowClickThroughEnabled: () => ipcRenderer.invoke('window-get-click-through'),
     setMainWindowClickThroughEnabled: (enabled) => ipcRenderer.invoke('window-set-click-through', enabled),
-    setMainWindowClickThroughUnlockHover: (active) => ipcRenderer.invoke('window-set-click-through-unlock-hover', active),
+    setMainWindowClickThroughUnlockHover: (active, viewportWidth, coordinates) => ipcRenderer.invoke('window-set-click-through-unlock-hover', active, viewportWidth, coordinates),
     getMainWindowAlwaysOnTop: () => ipcRenderer.invoke('window-get-always-on-top'),
     setMainWindowAlwaysOnTop: (enabled) => ipcRenderer.invoke('window-set-always-on-top', enabled),
     onMainWindowClickThroughChanged: (callback) => {
@@ -209,7 +228,7 @@ contextBridge.exposeInMainWorld('electron', {
     publishObsBrowserSourceAudio: (audio) => ipcRenderer.invoke('obs-browser-source-publish-audio', audio),
     getLyricApiStatus: () => ipcRenderer.invoke('lyric-api-get-status'),
     setLyricApiEnabled: (enabled) => ipcRenderer.invoke('lyric-api-set-enabled', enabled),
-    publishLyricApiData: (lyrics, offset) => ipcRenderer.invoke('lyric-api-publish', lyrics, offset),
+    publishLyricApiData: (lyrics, offset, clipStartMs) => ipcRenderer.invoke('lyric-api-publish', lyrics, offset, clipStartMs),
     onLyricApiStatusChanged: (callback) => {
         const listener = (_event, status) => callback(status);
         ipcRenderer.on('lyric-api-status-changed', listener);
@@ -264,6 +283,7 @@ contextBridge.exposeInMainWorld('electron', {
         return () => ipcRenderer.removeListener('remote-control-window-settings-changed', listener);
     },
     getRemoteControlPointerInside: () => ipcRenderer.invoke('remote-control-get-pointer-inside'),
+    setRemoteControlQueueExpansion: (wantedHeight, options) => ipcRenderer.invoke('remote-control-set-queue-expansion', wantedHeight, options),
     onRemoteControlPointerInside: (callback) => {
         const listener = (_event, inside) => callback(Boolean(inside));
         ipcRenderer.on('remote-control-pointer-inside', listener);
@@ -298,6 +318,7 @@ contextBridge.exposeInMainWorld('electron', {
     publishStagePlayerSnapshot: (snapshot, options) => ipcRenderer.invoke('stage-publish-player-snapshot', snapshot, options),
     completeStagePlayerControlRequest: (result) => ipcRenderer.invoke('stage-complete-player-control', result),
     completeStagePlayerQueueRequest: (result) => ipcRenderer.invoke('stage-complete-player-queue', result),
+    completeStagePlayerSearchRequest: (result) => ipcRenderer.invoke('stage-complete-player-search', result),
     onStageSessionUpdated: (callback) => {
         const listener = (_event, status) => callback(status);
         ipcRenderer.on('stage-session-updated', listener);
@@ -307,6 +328,12 @@ contextBridge.exposeInMainWorld('electron', {
         const listener = (_event, status) => callback(status);
         ipcRenderer.on('stage-session-cleared', listener);
         return () => ipcRenderer.removeListener('stage-session-cleared', listener);
+    },
+    // POST /stage/lyrics/clock: an external player's position for the lyrics session on screen.
+    onStageLyricsClockUpdated: (callback) => {
+        const listener = (_event, update) => callback(update);
+        ipcRenderer.on('stage-lyrics-clock-updated', listener);
+        return () => ipcRenderer.removeListener('stage-lyrics-clock-updated', listener);
     },
     onStageExternalPlayRequest: (callback) => {
         const listener = (_event, request) => callback(request);
@@ -323,6 +350,11 @@ contextBridge.exposeInMainWorld('electron', {
         ipcRenderer.on('stage-player-queue-request', listener);
         return () => ipcRenderer.removeListener('stage-player-queue-request', listener);
     },
+    onStagePlayerSearchRequest: (callback) => {
+        const listener = (_event, request) => callback(request);
+        ipcRenderer.on('stage-player-search-request', listener);
+        return () => ipcRenderer.removeListener('stage-player-search-request', listener);
+    },
     debugGetRenderedFonts: (selector) => ipcRenderer.invoke('debug-get-rendered-fonts', selector),
     mods: {
         listMods: () => ipcRenderer.invoke('folia-mods:list'),
@@ -330,6 +362,7 @@ contextBridge.exposeInMainWorld('electron', {
         reloadMods: () => ipcRenderer.invoke('folia-mods:reload'),
         invokeModRpc: (modId, name, args) => ipcRenderer.invoke('folia-mods:rpc', modId, name, args),
         invokeModStorage: (modId, operation, key, value) => ipcRenderer.invoke('folia-mods:storage', modId, operation, key, value),
+        invokeModSecrets: (modId, operation, key, value) => ipcRenderer.invoke('folia-mods:secrets', modId, operation, key, value),
         invokeModNetFetch: (modId, url, init) => ipcRenderer.invoke('folia-mods:net-fetch', modId, url, init),
         invokeModPickFile: (modId, accept, persist) => ipcRenderer.invoke('folia-mods:pick-file', modId, accept, persist),
         invokeModRestoreFile: (modId, grantId) => ipcRenderer.invoke('folia-mods:restore-file', modId, grantId),
@@ -358,6 +391,74 @@ contextBridge.exposeInMainWorld('electron', {
             const listener = (_event, entry) => callback(entry);
             ipcRenderer.on('folia-mods:log', listener);
             return () => ipcRenderer.removeListener('folia-mods:log', listener);
+        },
+        onModRpcMessage: (callback) => {
+            const listener = (_event, message) => callback(message);
+            ipcRenderer.on('folia-mods:rpc-message', listener);
+            return () => ipcRenderer.removeListener('folia-mods:rpc-message', listener);
+        },
+        onModSecretChanged: (callback) => {
+            const listener = (_event, change) => callback(change);
+            ipcRenderer.on('folia-mods:secret-changed', listener);
+            return () => ipcRenderer.removeListener('folia-mods:secret-changed', listener);
+        },
+    },
+    hifi: {
+        getRuntimeStatus: () => ipcRenderer.invoke('hifi:get-runtime-status'),
+        detectRuntime: () => ipcRenderer.invoke('hifi:detect-runtime'),
+        pickRuntimePath: () => ipcRenderer.invoke('hifi:pick-runtime-path'),
+        installRuntime: () => ipcRenderer.invoke('hifi:install-runtime'),
+        cancelInstall: () => ipcRenderer.invoke('hifi:cancel-install'),
+        configure: (config) => ipcRenderer.invoke('hifi:configure', config),
+        listDevices: () => ipcRenderer.invoke('hifi:list-devices'),
+        load: (request) => ipcRenderer.invoke('hifi:load', request),
+        play: () => ipcRenderer.invoke('hifi:play'),
+        pause: () => ipcRenderer.invoke('hifi:pause'),
+        seek: (positionSec) => ipcRenderer.invoke('hifi:seek', positionSec),
+        stop: () => ipcRenderer.invoke('hifi:stop'),
+        setLoopFile: (loop) => ipcRenderer.invoke('hifi:set-loop-file', loop),
+        preloadNext: (request) => ipcRenderer.invoke('hifi:preload-next', request),
+        clearNext: () => ipcRenderer.invoke('hifi:clear-next'),
+        getSnapshot: () => ipcRenderer.invoke('hifi:get-snapshot'),
+        probeOutput: () => ipcRenderer.invoke('hifi:probe-output'),
+        respondRead: (readId, response) => ipcRenderer.invoke('hifi:read-result', readId, response),
+        // Linux：HiFi 在放时主进程登记的 MPRIS（electron/hifi/mpris/）。
+        setMprisState: (state) => ipcRenderer.invoke('hifi:mpris-state', state),
+        setMprisArtwork: (trackKey, artwork) => ipcRenderer.invoke('hifi:mpris-artwork', trackKey, artwork),
+        onMprisCommand: (callback) => {
+            const listener = (_event, command) => callback(command);
+            ipcRenderer.on('hifi:mpris-command', listener);
+            return () => ipcRenderer.removeListener('hifi:mpris-command', listener);
+        },
+        onMprisStatus: (callback) => {
+            const listener = (_event, status) => callback(status);
+            ipcRenderer.on('hifi:mpris-status', listener);
+            return () => ipcRenderer.removeListener('hifi:mpris-status', listener);
+        },
+        onState: (callback) => {
+            const listener = (_event, state) => callback(state);
+            ipcRenderer.on('hifi:state', listener);
+            return () => ipcRenderer.removeListener('hifi:state', listener);
+        },
+        onClock: (callback) => {
+            const listener = (_event, update) => callback(update);
+            ipcRenderer.on('hifi:clock', listener);
+            return () => ipcRenderer.removeListener('hifi:clock', listener);
+        },
+        onError: (callback) => {
+            const listener = (_event, hifiError) => callback(hifiError);
+            ipcRenderer.on('hifi:error', listener);
+            return () => ipcRenderer.removeListener('hifi:error', listener);
+        },
+        onInstallProgress: (callback) => {
+            const listener = (_event, progress) => callback(progress);
+            ipcRenderer.on('hifi:install-progress', listener);
+            return () => ipcRenderer.removeListener('hifi:install-progress', listener);
+        },
+        onReadRequest: (callback) => {
+            const listener = (_event, request) => callback(request);
+            ipcRenderer.on('hifi:read', listener);
+            return () => ipcRenderer.removeListener('hifi:read', listener);
         },
     },
 });
